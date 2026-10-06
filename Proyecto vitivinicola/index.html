@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Más que vino</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome (Iconos) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Leaflet.js CSS (Mapa Interactivo) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 3rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            /* Efecto vidriado */
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1000;
+        }
+
+        .author-name {
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .author-name i {
+            color: #d4af37;
+            /* Icono en dorado */
+        }
+
+        .top-tag {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            padding-left: 15px;
+        }
+
+        .hero-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(circle at center, #3f090b 0%, #000000 70%);
+        }
+
+        .main-title {
+
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1.15;
+            color: #f8f9fa;
+            margin-bottom: 1.5rem;
+            text-shadow: 0px 4px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+
+        .wine-glass-container {
+            margin: 1rem 0 2rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 12px rgba(144, 12, 63, 0.4));
+        }
+
+        .wine-glass {
+            width: 75px;
+            height: 90px;
+        }
+
+        /* Animación de llenado usando CSS transform */
+        .wine-liquid {
+            fill: url(#wineGradient);
+            animation: fillWine 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+        }
+
+        @keyframes fillWine {
+            0% {
+                transform: translateY(48px);
+                /* Copa vacía */
+            }
+
+            35% {
+                transform: translateY(48px);
+                /* Pausa vacía */
+            }
+
+            80% {
+                transform: translateY(10px);
+                /* Copa llena */
+            }
+
+            100% {
+                transform: translateY(10px);
+                /* Pausa llena */
+            }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        .hero-container { position: relative; padding: 6rem 2rem 7rem; }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            width: fit-content;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            color: #d4af37;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color .3s;
+        }
+
+        .scroll-indicator .scroll-circle {
+            width: 46px;
+            height: 46px;
+            border: 1px solid #d4af37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseDown 2s infinite;
+            transition: background .3s, color .3s;
+        }
+
+        .scroll-indicator:hover { color: #fff; }
+        .scroll-indicator:hover .scroll-circle { background: #d4af37; color: #000; }
+
+        @keyframes pulseDown {
+            0%, 100% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(212, 175, 55, .4); }
+            50% { transform: translateY(6px); box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+        }
+
+        /* --- SECCIÓN DEL MAPA --- */
+        .map-section {
+            min-height: 100vh;
+            padding: 6rem 2rem 4rem 2rem;
+            background-color: #0b0b0b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #d4af37;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-desc {
+            color: #aaaaaa;
+            font-size: 0.95rem;
+            max-width: 800px;
+        }
+
+        .controls-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-custom {
+            background: transparent;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover,
+        .btn-custom.active {
+            background: #d4af37;
+            color: #000;
+            font-weight: 600;
+        }
+
+        #map {
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+            z-index: 1;
+        }
+
+        /* Estilos personalizados para Popups de Leaflet */
+        .leaflet-popup-content-wrapper {
+            background: rgba(18, 18, 18, 0.95) !important;
+            color: #ffffff !important;
+            border: 1px solid #d4af37 !important;
+            border-radius: 8px !important;
+            font-family: 'Montserrat', sans-serif !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #d4af37 !important;
+        }
+
+        .popup-title {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 4px;
+        }
+
+        .popup-metric {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: #cccccc;
+        }
+
+        .popup-metric strong {
+            color: #ffffff;
+        }
+
+
+
+        /* --- BOTÓN "SIGUIENTE" ENTRE CAPÍTULOS --- */
+        .next-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+            margin: 2.5rem auto 0;
+            color: #d4af37;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color .3s;
+        }
+        .next-btn .next-circle {
+            width: 46px;
+            height: 46px;
+            border: 1px solid #d4af37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseDown 2s infinite;
+            transition: background .3s, color .3s;
+        }
+        .next-btn.up .next-circle { animation: none; }
+        .next-btn:hover { color: #fff; }
+        .next-btn:hover .next-circle { background: #d4af37; color: #000; }
+
+        /* --- STORYTELLING --- */
+        .reveal{opacity:0;transform:translateY(30px);transition:all .8s ease}
+        .reveal.in{opacity:1;transform:none}
+        .kpis{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:1.2rem;width:100%;max-width:1000px;margin:1rem auto 0}
+        .kpi{flex:1 1 200px;max-width:230px;text-align:center;padding:1.2rem 1rem;border:1px solid rgba(212,175,55,.25);border-radius:12px;background:rgba(255,255,255,.02)}
+        .kpi b{display:block;font-family:'Playfair Display',serif;font-size:2rem;color:#d4af37}
+        .kpi span{font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:#999}
+        .chapter{padding:5rem 2rem;background:#0b0b0b}
+        .chapter.alt{background:#050505}
+        .chapter-in{max-width:1200px;margin:0 auto}
+        .chapter-num{font-size:.8rem;letter-spacing:4px;text-transform:uppercase;color:#C70039}
+        .chapter h3{font-family:'Playfair Display',serif;font-size:2.2rem;color:#f8f9fa;margin:.4rem 0 1rem}
+        .lead-txt{color:#b5b5b5;max-width:760px;margin-bottom:1.5rem}
+        .chart-card{border:1px solid rgba(212,175,55,.25);border-radius:12px;padding:1.2rem;background:rgba(255,255,255,.02);height:460px;position:relative}
+        .chart-card.sm{height:380px}
+        .insight{margin-top:1.2rem;padding:1rem 1.2rem;border-left:3px solid #d4af37;background:rgba(212,175,55,.07);color:#ddd;font-size:.95rem}
+        .insight strong{color:#d4af37}
+        .hint{font-size:.78rem;color:#777;margin-top:.5rem}
+        .ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:1rem;color:#aaa;font-size:.85rem}
+        .ctrl input[type=range]{accent-color:#d4af37;width:220px}
+        .ctrl output{color:#d4af37;font-weight:600;min-width:40px}
+        .sim-big{font-family:'Playfair Display',serif;font-size:3.4rem;color:#d4af37;line-height:1}
+        .bar-track{height:14px;background:#1a1a1a;border-radius:8px;overflow:hidden;margin:.6rem 0}
+        .bar-fill{height:100%;background:linear-gradient(90deg,#581845,#C70039);transition:width .3s}
+        .final{padding:6rem 2rem;text-align:center;background:radial-gradient(circle at center,#3f090b 0%,#000 70%)}
+        .final h3{font-family:'Playfair Display',serif;font-size:2.6rem;margin-bottom:1rem}
+        .final p{max-width:760px;margin:0 auto .8rem;color:#ccc}
+
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-navbar">
+        <div class="author-name">
+            <i class="fa-solid fa-user-circle"></i>
+            Lupe Malbec
+        </div>
+        <div class="top-tag">
+            Contar con datos 2026 /
+            Universidad de San Andrés
+        </div>
+    </header>
+
+
+    <section class="hero-container" id="inicio">
+        <h1 class="main-title">Más que vino</h1>
+
+        <p class="subtitle">
+            Análisis de estrategia comercial y exportaciones de la industria vitivinícola argentina
+        </p>
+
+        <div class="wine-glass-container">
+            <svg viewBox="0 0 100 120" class="wine-glass">
+                <defs>
+                    <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#C70039" />
+                        <stop offset="100%" stop-color="#581845" />
+                    </linearGradient>
+
+                    <clipPath id="glassInner">
+                        <path d="M28 20 Q28 62 50 68 Q72 62 72 20 Z" />
+                    </clipPath>
+                </defs>
+
+                <g clip-path="url(#glassInner)">
+                    <rect class="wine-liquid" x="20" y="15" width="60" height="55" />
+                </g>
+
+                <path d="M28 20 Q28 62 50 68 Q72 62 72 20 Z" fill="none" stroke="#d4af37" stroke-width="2.2"
+                    stroke-linecap="round" />
+                <line x1="50" y1="68" x2="50" y2="100" stroke="#d4af37" stroke-width="2.2" />
+                <line x1="32" y1="100" x2="68" y2="100" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round" />
+            </svg>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <p class="hint" id="kpiNote" style="max-width:760px"></p>
+
+        <a href="#cap1" class="scroll-indicator">
+            <span>Descubrir la historia</span>
+            <span class="scroll-circle"><i class="fa-solid fa-chevron-down"></i></span>
+        </a>
+    </section>
+
+
+    <section class="chapter" id="cap1">
+        <div class="chapter-in reveal">
+            <div class="chapter-num">Capítulo 1</div>
+            <h3>¿Dónde se toma nuestro vino orgánico?</h3>
+            <p class="lead-txt">El volumen cuenta la primera parte de la historia: pocos mercados concentran gran parte de los litros exportados. Hacé clic en una barra para verla en el mapa.</p>
+            <div class="ctrl">
+                <button id="mLitros" class="btn-custom active" onclick="setMetrica('litros_totales',this)">Litros</button>
+                <button id="mEmb" class="btn-custom" onclick="setMetrica('cantidad_embarques',this)">Embarques</button>
+            </div>
+            <div class="chart-card"><canvas id="chVol"></canvas></div>
+            <div class="insight" id="ins1"></div>
+            <a href="#cap2" class="next-btn"><span>Capítulo 2</span><span class="next-circle"><i class="fa-solid fa-chevron-down"></i></span></a>
+        </div>
+    </section>
+
+    <section class="chapter alt" id="cap2">
+        <div class="chapter-in reveal">
+            <div class="chapter-num">Capítulo 2</div>
+            <h3>Más volumen no siempre es más valor</h3>
+            <p class="lead-txt">Cada burbuja es un mercado: a la derecha, más litros; arriba, mejor precio mediano; el tamaño indica la cantidad de embarques. La zona superior izquierda es la más interesante: pagan bien y todavía reciben poco.</p>
+            <div class="ctrl">
+                <label for="minEmb">Mínimo de embarques (también filtra el capítulo 3):</label>
+                <input type="range" id="minEmb" min="1" max="20" value="1" oninput="actualizarFiltro(this.value)">
+                <output id="minEmbOut">1</output>
+            </div>
+            <div class="chart-card"><canvas id="chBub"></canvas></div>
+            <div class="insight" id="ins2"></div>
+            <a href="#cap3" class="next-btn"><span>Capítulo 3</span><span class="next-circle"><i class="fa-solid fa-chevron-down"></i></span></a>
+        </div>
+    </section>
+
+    <section class="chapter" id="cap3">
+        <div class="chapter-in reveal">
+            <div class="chapter-num">Capítulo 3</div>
+            <h3>El techo de precio: hasta dónde se puede llegar</h3>
+            <p class="lead-txt">Cada barra va del precio mediano al percentil 75 (P75) de cada mercado. Cuanto más larga, más margen hay para que el vino argentino suba de categoría.</p>
+            <div class="chart-card"><canvas id="chRng"></canvas></div>
+            <div class="insight" id="ins3"></div>
+            <a href="#mapa-section" class="next-btn"><span>El mapa</span><span class="next-circle"><i class="fa-solid fa-chevron-down"></i></span></a>
+        </div>
+    </section>
+
+    <!-- SECCIÓN MAPA INTERACTIVO -->
+    <section id="mapa-section" class="map-section">
+        <div class="section-header">
+            <h2 class="section-title">Geografía del Vino Orgánico Exportado</h2>
+            <p class="section-desc">
+                Visualización geográfica de los principales mercados internacionales y las provincias
+                argentinas desde donde sale el vino (provincia depositaria).
+            </p>
+        </div>
+
+        <div class="controls-container">
+            <button id="btnPaises" class="btn-custom active" onclick="mostrarPaises()">
+                <i class="fa-solid fa-globe me-1"></i> Destinos Internacionales
+            </button>
+            <button id="btnProvincias" class="btn-custom" onclick="mostrarProvincias()">
+                <i class="fa-solid fa-map-pin me-1"></i> Provincias Depositarias
+            </button>
+        </div>
+
+        <!-- Contenedor Mapa Leaflet -->
+        <div id="map"></div>
+        <a href="#cap4" class="next-btn"><span>Capítulo 4</span><span class="next-circle"><i class="fa-solid fa-chevron-down"></i></span></a>
+    </section>
+
+
+    <section class="chapter alt" id="cap4">
+        <div class="chapter-in reveal">
+            <div class="chapter-num">Capítulo 4</div>
+            <h3>La provincia: desde dónde sale el vino</h3>
+            <p class="lead-txt">La exportación orgánica sale de muy pocas provincias (provincia depositaria: donde está el vino al exportarse). Compará cuánto pesa cada una en el volumen y a qué precio vende.</p>
+            <div class="row g-3">
+                <div class="col-lg-5"><div class="chart-card sm"><canvas id="chProv"></canvas></div></div>
+                <div class="col-lg-7"><div class="chart-card sm"><canvas id="chProvP"></canvas></div></div>
+            </div>
+            <div class="insight" id="ins4"></div>
+            <a href="#cap5" class="next-btn"><span>Capítulo 5</span><span class="next-circle"><i class="fa-solid fa-chevron-down"></i></span></a>
+        </div>
+    </section>
+
+    <section class="chapter" id="cap5">
+        <div class="chapter-in reveal">
+            <div class="chapter-num">Capítulo 5</div>
+            <h3>¿Y si cada mercado llegara a su techo?</h3>
+            <p class="lead-txt">Simulador ilustrativo: ¿qué pasaría con el valor de las exportaciones si, con el mismo volumen, cada mercado cerrara una parte de la brecha entre su precio mediano y su P75?</p>
+            <div class="ctrl">
+                <label for="simPct">Porcentaje de la brecha al P75 que se captura:</label>
+                <input type="range" id="simPct" min="0" max="100" value="25" oninput="simular(this.value)">
+                <output id="simOut">25%</output>
+            </div>
+            <div class="sim-big" id="simBig">—</div>
+            <div class="bar-track"><div class="bar-fill" id="simBar" style="width:0"></div></div>
+            <div class="hint" id="simTxt"></div>
+            <div class="hint">Estimación = litros × (P75 − precio mediano) × % de brecha elegido, sumado por mercado. Es un ejercicio de escenario, no una proyección.</div>
+            <div class="hint" id="simNote"></div>
+            <a href="#final" class="next-btn"><span>Conclusión</span><span class="next-circle"><i class="fa-solid fa-chevron-down"></i></span></a>
+        </div>
+    </section>
+
+    <section class="final reveal" id="final">
+        <h3>Más que vino</h3>
+        <p id="finalTxt"></p>
+        <p style="color:#d4af37;letter-spacing:2px;text-transform:uppercase;font-size:.8rem">La oportunidad está en el valor, no solo en el volumen.</p>
+        <a href="#inicio" class="next-btn up"><span>Volver al inicio</span><span class="next-circle"><i class="fa-solid fa-chevron-up"></i></span></a>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Diccionario de Coordenadas
+        const coordenadasPaises = {
+            "Noruega": [59.9139, 10.7522],
+            "Francia": [46.2276, 2.2137],
+            "Malasia": [4.2105, 101.9758],
+            "Grecia": [39.0742, 21.8243],
+            "Panama": [8.5380, -80.7821],
+            "Suiza": [46.8182, 8.2275],
+            "Peru": [-9.1900, -75.0152],
+            "Mexico": [23.6345, -102.5528],
+            "Costa Rica": [9.7489, -83.7534],
+            "Republica Federal De Alemania": [51.1657, 10.4515],
+            "España": [40.4637, -3.7492],
+            "Suecia": [60.1282, 18.6435],
+            "Brasil": [-14.2350, -51.9253],
+            "Reino Unido": [55.3781, -3.4360],
+            "Curazao": [12.1696, -68.9900],
+            "Belgica": [50.5039, 4.4699],
+            "Canada": [56.1304, -106.3468],
+            "Australia": [-25.2744, 133.7751],
+            "Bahreim": [26.0667, 50.5577],
+            "Estados Unidos": [37.0902, -95.7129],
+            "Emiratos Arabes Unidos": [23.4241, 53.8478],
+            "China": [35.8617, 104.1954],
+            "Irlanda": [53.1424, -7.6921],
+            "Paises Bajos": [52.1326, 5.2913],
+            "Finlandia": [61.9241, 25.7482],
+            "Uruguay": [-32.5228, -55.7658],
+            "Tailandia": [15.8700, 100.9925],
+            "Nueva Zelanda": [-40.9006, 174.8860]
+        };
+
+        const coordenadasProvincias = {
+            "Mendoza": [-32.8895, -68.8458],
+            "Rio Negro": [-40.8135, -62.9967],
+            "Salta": [-24.7859, -65.4117],
+            "Ciudad Autonoma De Bs.As.": [-34.6037, -58.3816],
+            "San Juan": [-31.5375, -68.5364]
+        };
+
+        let map, capaPaises, capaProvincias;
+        const marcadores = {};
+        let datosCargados = null;
+
+        // Inicializar Mapa
+        document.addEventListener("DOMContentLoaded", function () {
+            map = L.map('map').setView([20, 0], 2);
+
+            // Servidor ESRI Dark Gray (Gratuito, sin API key ni marcas de agua)
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 16,
+                attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+            }).addTo(map);
+
+            capaPaises = L.layerGroup().addTo(map);
+            capaProvincias = L.layerGroup();
+
+            // Cargar datos JSON exportados por el script .py
+            fetch('datos_completos.json')
+                .then(response => response.json())
+                .then(data => {
+                    datosCargados = data;
+                    cargarPaises(data.ranking_paises);
+                    cargarProvincias(data.ranking_provincias);
+                    iniciarStory(data);
+                })
+                .catch(error => {
+                    console.error("Error al cargar el JSON:", error);
+                    document.getElementById('kpis').innerHTML = '<p style="color:#C70039;max-width:600px">No se pudo cargar <b>datos_completos.json</b>. Abrí la página desde un servidor (Live Server, GitHub Pages o <code>python -m http.server</code>); con doble clic sobre el archivo el navegador lo bloquea.</p>';
+                });
+        });
+
+        // Cargar Marcadores de Países
+        function cargarPaises(paises) {
+            capaPaises.clearLayers();
+            paises.forEach(item => {
+                const coords = coordenadasPaises[item.pais];
+                if (coords) {
+                    // Tamaño proporcional a los litros
+                    const radio = Math.min(Math.max(Math.sqrt(item.litros_totales) / 12, 6), 30);
+
+                    const marker = L.circleMarker(coords, {
+                        radius: radio,
+                        fillColor: "#C70039",
+                        color: "#d4af37",
+                        weight: 1.5,
+                        opacity: 0.9,
+                        fillOpacity: 0.6
+                    });
+
+                    const popupContent = `
+                        <div class="popup-title">${item.pais}</div>
+                        <div class="popup-metric"><strong>Precio Mediano:</strong> USD ${item.precio_mediano.toFixed(2)} / L</div>
+                        <div class="popup-metric"><strong>Techo Precio (P75):</strong> USD ${item.techo_precio_p75.toFixed(2)} / L</div>
+                        <div class="popup-metric"><strong>Volumen Total:</strong> ${item.litros_totales.toLocaleString()} L</div>
+                        <div class="popup-metric"><strong>Embarques:</strong> ${item.cantidad_embarques}</div>
+                    `;
+
+                    marker.bindPopup(popupContent);
+                    marcadores[item.pais] = marker;
+                    capaPaises.addLayer(marker);
+                }
+            });
+        }
+
+        // Cargar Marcadores de Provincias
+        function cargarProvincias(provincias) {
+            capaProvincias.clearLayers();
+            provincias.forEach(item => {
+                const coords = coordenadasProvincias[item.provincia_depositario];
+                if (coords) {
+                    const radio = Math.min(Math.max(Math.sqrt(item.litros_totales) / 25, 8), 35);
+
+                    const marker = L.circleMarker(coords, {
+                        radius: radio,
+                        fillColor: "#d4af37",
+                        color: "#ffffff",
+                        weight: 1.5,
+                        opacity: 0.9,
+                        fillOpacity: 0.7
+                    });
+
+                    const popupContent = `
+                        <div class="popup-title">${item.provincia_depositario}</div>
+                        <div class="popup-metric"><strong>Participación Volumen:</strong> ${item["%_participacion_volumen"].toFixed(2)}%</div>
+                        <div class="popup-metric"><strong>Precio Promedio:</strong> USD ${item.precio_promedio_litro.toFixed(2)} / L</div>
+                        <div class="popup-metric"><strong>Total Exportado:</strong> ${item.litros_totales.toLocaleString()} L</div>
+                        <div class="popup-metric"><strong>Total FOB USD:</strong> $${item.fob_totales_usd.toLocaleString()}</div>
+                    `;
+
+                    marker.bindPopup(popupContent);
+                    capaProvincias.addLayer(marker);
+                }
+            });
+        }
+
+        // Controles de Alternancia de Capas
+        function mostrarPaises() {
+            document.getElementById("btnPaises").classList.add("active");
+            document.getElementById("btnProvincias").classList.remove("active");
+
+            map.removeLayer(capaProvincias);
+            map.addLayer(capaPaises);
+            map.flyTo([20, 0], 2);
+        }
+
+        function mostrarProvincias() {
+            document.getElementById("btnProvincias").classList.add("active");
+            document.getElementById("btnPaises").classList.remove("active");
+
+            map.removeLayer(capaPaises);
+            map.addLayer(capaProvincias);
+            map.flyTo([-36.0, -64.0], 4);
+        }
+    </script>
+
+    <script>
+        // ===== STORYTELLING / GRÁFICOS INTERACTIVOS =====
+        const alias = { "Republica Federal De Alemania": "Alemania", "Ciudad Autonoma De Bs.As.": "CABA", "Emiratos Arabes Unidos": "EAU", "Estados Unidos": "EE.UU." };
+        const nm = t => alias[t] || t;
+        const f0 = n => (n ?? 0).toLocaleString('es-AR', { maximumFractionDigits: 0 });
+        const f2 = n => (n ?? 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const GOLD = '#d4af37', RED = '#C70039', WINE = '#581845';
+        const charts = {}; let PAISES = [], PROVS = [], metrica = 'litros_totales', TOT_FOB = 0;
+
+        if (window.Chart) {
+            Chart.defaults.color = '#aaa';
+            Chart.defaults.font.family = "Montserrat, sans-serif";
+            Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(18,18,18,.95)';
+            Chart.defaults.plugins.tooltip.borderColor = GOLD;
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+        }
+
+        // Reveal al hacer scroll
+        const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+        document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('.reveal').forEach(el => io.observe(el)));
+
+        function contar(el, fin, pref = '', suf = '', dec = 0) {
+            const t0 = performance.now();
+            (function paso(t) {
+                const k = Math.min((t - t0) / 1400, 1), v = fin * (1 - Math.pow(1 - k, 3));
+                el.textContent = pref + v.toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf;
+                if (k < 1) requestAnimationFrame(paso);
+            })(t0);
+        }
+
+        // Ir al país en el mapa desde un gráfico
+        function irAlMapa(pais) {
+            const c = coordenadasPaises[pais]; if (!c) return;
+            document.getElementById('btnPaises').classList.add('active');
+            document.getElementById('btnProvincias').classList.remove('active');
+            map.removeLayer(capaProvincias); map.addLayer(capaPaises);
+            document.getElementById('mapa-section').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => { map.flyTo(c, 4); setTimeout(() => marcadores[pais] && marcadores[pais].openPopup(), 1300); }, 700);
+        }
+
+        function iniciarStory(d) {
+            PAISES = (d.ranking_paises || []).filter(p => p.litros_totales > 0);
+            PROVS = d.ranking_provincias || [];
+            // Totales reales: se calculan desde los registros orgánicos del JSON (no solo desde el ranking de países)
+            const ORG = (d.registros_totales || []).filter(r => r.estilo_vino === 'Orgánico Certificado');
+            const hayReg = ORG.length > 0;
+            const litrosRank = PAISES.reduce((a, p) => a + p.litros_totales, 0);
+            const totL = hayReg ? ORG.reduce((a, r) => a + (r.litros_exportados || 0), 0) : litrosRank;
+            const nPaises = hayReg ? new Set(ORG.map(r => r.pais)).size : PAISES.length;
+            const totEmb = hayReg ? ORG.length : PAISES.reduce((a, p) => a + (p.cantidad_embarques || 0), 0);
+            const totFob = hayReg ? Math.round(ORG.reduce((a, r) => a + (r.valor_fob_miles || 0) * 1000, 0)) : PROVS.reduce((a, v) => a + (v.fob_totales_usd || 0), 0);
+            TOT_FOB = totFob;
+            if (hayReg && nPaises > PAISES.length) {
+                const pctFuera = (totL - litrosRank) / totL * 100;
+                document.getElementById('kpiNote').textContent = `Los gráficos y el mapa muestran los ${PAISES.length} destinos del ranking de países, de un total de ${nPaises}: los ${nPaises - PAISES.length} restantes suman solo el ${f2(pctFuera)}% de los litros.`;
+            }
+
+            document.getElementById('kpis').innerHTML =
+                '<div class="kpi"><b id="k1">0</b><span>Litros exportados</span></div>' +
+                '<div class="kpi"><b id="k2">0</b><span>Países de destino</span></div>' +
+                '<div class="kpi"><b id="k3">0</b><span>Embarques</span></div>' +
+                '<div class="kpi"><b id="k4">0</b><span>Valor FOB (USD)</span></div>';
+            contar(document.getElementById('k1'), totL);
+            contar(document.getElementById('k2'), nPaises);
+            contar(document.getElementById('k3'), totEmb);
+            contar(document.getElementById('k4'), totFob, '$');
+
+            dibujarVolumen(); dibujarBurbujas(1); dibujarRango(1); dibujarProvincias();
+            const maxE = Math.max(...PAISES.map(p => p.cantidad_embarques || 0));
+            const sl = document.getElementById('minEmb'); sl.max = Math.max(2, Math.min(maxE, 50));
+            simular(25);
+
+            // Insights dinámicos
+            const top = [...PAISES].sort((a, b) => b.litros_totales - a.litros_totales);
+            const top3 = top.slice(0, 3), sh3 = top3.reduce((a, p) => a + p.litros_totales, 0) / totL * 100;
+            document.getElementById('ins1').innerHTML = `<strong>${top3.map(p => nm(p.pais)).join(', ')}</strong> concentran el <strong>${f2(sh3)}%</strong> de los litros exportados. Depender de pocos mercados es una fortaleza y también un riesgo.`;
+
+            const medL = [...PAISES].map(p => p.litros_totales).sort((a, b) => a - b)[Math.floor(PAISES.length / 2)];
+            const nicho = PAISES.filter(p => p.litros_totales <= medL).sort((a, b) => b.precio_mediano - a.precio_mediano)[0];
+            const lider = top[0];
+            const caro = [...PAISES].sort((a, b) => b.precio_mediano - a.precio_mediano)[0];
+            const puestoCaro = top.findIndex(p => p.pais === caro.pais) + 1;
+            if (nicho) document.getElementById('ins2').innerHTML = `<strong>${nm(nicho.pais)}</strong> paga un precio mediano de <strong>USD ${f2(nicho.precio_mediano)}/L</strong> con volumen por debajo de la mediana, mientras que el mayor mercado, <strong>${nm(lider.pais)}</strong>, paga USD ${f2(lider.precio_mediano)}/L.` + (caro.pais !== nicho.pais ? ` El precio más alto es el de <strong>${nm(caro.pais)}</strong>: <strong>USD ${f2(caro.precio_mediano)}/L</strong>, con ${f0(caro.litros_totales)} L (puesto ${puestoCaro} por volumen).` : '');
+
+            const marg = [...PAISES].filter(p => p.techo_precio_p75 != null).sort((a, b) => (b.techo_precio_p75 - b.precio_mediano) - (a.techo_precio_p75 - a.precio_mediano))[0];
+            if (marg) document.getElementById('ins3').innerHTML = `El mayor margen de mejora está en <strong>${nm(marg.pais)}</strong>: del mediano (USD ${f2(marg.precio_mediano)}) al P75 (USD ${f2(marg.techo_precio_p75)}) hay <strong>USD ${f2(marg.techo_precio_p75 - marg.precio_mediano)}/L</strong> de diferencia.`;
+
+            const pv = [...PROVS].sort((a, b) => b.litros_totales - a.litros_totales)[0];
+            if (pv) {
+                const fobProv = PROVS.reduce((a, v) => a + (v.fob_totales_usd || 0), 0);
+                const pp = [...PROVS].sort((a, b) => b.precio_promedio_litro - a.precio_promedio_litro)[0];
+                let t = `<strong>${nm(pv.provincia_depositario)}</strong> explica el <strong>${f2(pv["%_participacion_volumen"])}%</strong> del volumen exportado, a un precio promedio de USD ${f2(pv.precio_promedio_litro)}/L.`;
+                if (pp && pp.provincia_depositario !== pv.provincia_depositario && fobProv) t += ` En cambio, <strong>${nm(pp.provincia_depositario)}</strong> aporta el ${f2(pp["%_participacion_volumen"])}% del volumen pero el <strong>${f2(pp.fob_totales_usd / fobProv * 100)}%</strong> del valor FOB, a <strong>USD ${f2(pp.precio_promedio_litro)}/L</strong>.`;
+                document.getElementById('ins4').innerHTML = t;
+            }
+
+            document.getElementById('finalTxt').innerHTML = `Argentina exportó <strong>${f0(totL)} litros</strong> de vino orgánico a <strong>${nPaises} países</strong>. ${nicho ? `Mercados como ${nm(nicho.pais)} demuestran que hay compradores dispuestos a pagar más.` : ''} La estrategia no es solo vender más litros, sino llegar a los mercados donde el vino vale más.`;
+        }
+
+        function dibujarVolumen() {
+            const arr = [...PAISES].sort((a, b) => b[metrica] - a[metrica]).slice(0, 10);
+            if (charts.vol) charts.vol.destroy();
+            charts.vol = new Chart(document.getElementById('chVol'), {
+                type: 'bar',
+                data: { labels: arr.map(p => nm(p.pais)), datasets: [{ data: arr.map(p => p[metrica]), backgroundColor: RED, borderColor: GOLD, borderWidth: 1, borderRadius: 4 }] },
+                options: {
+                    indexAxis: 'y', maintainAspectRatio: false, animation: { duration: 900 },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + f0(c.raw) + (metrica === 'litros_totales' ? ' L' : ' embarques') } } },
+                    onClick: (e, els) => { if (els.length) irAlMapa(arr[els[0].index].pais); },
+                    onHover: (e, els) => e.native.target.style.cursor = els.length ? 'pointer' : 'default'
+                }
+            });
+        }
+        function setMetrica(m, btn) {
+            metrica = m;
+            document.querySelectorAll('#mLitros,#mEmb').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+            dibujarVolumen();
+        }
+
+        function dibujarBurbujas(min) {
+            const arr = PAISES.filter(p => (p.cantidad_embarques || 0) >= min);
+            const maxE = Math.max(...PAISES.map(p => p.cantidad_embarques || 1));
+            if (charts.bub) charts.bub.destroy();
+            charts.bub = new Chart(document.getElementById('chBub'), {
+                type: 'bubble',
+                data: { datasets: [{ data: arr.map(p => ({ x: p.litros_totales, y: p.precio_mediano, r: 5 + 20 * Math.sqrt((p.cantidad_embarques || 1) / maxE), p })), backgroundColor: 'rgba(199,0,57,.55)', borderColor: GOLD, borderWidth: 1.5 }] },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { x: { type: 'logarithmic', title: { display: true, text: 'Litros exportados (escala log)' } }, y: { title: { display: true, text: 'Precio mediano USD/L' } } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => [nm(c.raw.p.pais), 'Precio mediano: USD ' + f2(c.raw.y), 'Litros: ' + f0(c.raw.x), 'Embarques: ' + c.raw.p.cantidad_embarques] } } },
+                    onClick: (e, els) => { if (els.length) irAlMapa(arr[els[0].index].pais); },
+                    onHover: (e, els) => e.native.target.style.cursor = els.length ? 'pointer' : 'default'
+                }
+            });
+        }
+        function actualizarFiltro(v) { document.getElementById('minEmbOut').textContent = v; dibujarBurbujas(+v); dibujarRango(+v); }
+
+        function dibujarRango(min) {
+            const arr = PAISES.filter(p => p.techo_precio_p75 != null && (p.cantidad_embarques || 0) >= min).sort((a, b) => b.techo_precio_p75 - a.techo_precio_p75).slice(0, 12);
+            if (charts.rng) charts.rng.destroy();
+            charts.rng = new Chart(document.getElementById('chRng'), {
+                type: 'bar',
+                data: { labels: arr.map(p => nm(p.pais)), datasets: [{ data: arr.map(p => [p.precio_mediano, p.techo_precio_p75]), backgroundColor: GOLD, borderRadius: 6, borderSkipped: false }] },
+                options: {
+                    indexAxis: 'y', maintainAspectRatio: false,
+                    scales: { x: { title: { display: true, text: 'USD por litro' } } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' Mediano USD ' + f2(c.raw[0]) + '  →  P75 USD ' + f2(c.raw[1]) } } }
+                }
+            });
+        }
+
+        function dibujarProvincias() {
+            const arr = [...PROVS].sort((a, b) => b.litros_totales - a.litros_totales);
+            const cols = [RED, GOLD, WINE, '#8e44ad', '#e67e22', '#2c7a7b'];
+            charts.prov = new Chart(document.getElementById('chProv'), {
+                type: 'doughnut',
+                data: { labels: arr.map(v => nm(v.provincia_depositario)), datasets: [{ data: arr.map(v => v.litros_totales), backgroundColor: cols, borderColor: '#0b0b0b', borderWidth: 3 }] },
+                options: { maintainAspectRatio: false, cutout: '58%', plugins: { title: { display: true, text: 'Participación en litros', color: '#ddd' }, legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ' ' + f0(c.raw) + ' L' } } } }
+            });
+            charts.provP = new Chart(document.getElementById('chProvP'), {
+                type: 'bar',
+                data: { labels: arr.map(v => nm(v.provincia_depositario)), datasets: [{ data: arr.map(v => v.precio_promedio_litro), backgroundColor: cols, borderRadius: 6 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Precio promedio USD/L', color: '#ddd' }, tooltip: { callbacks: { label: c => ' USD ' + f2(c.raw) + ' / L' } } } }
+            });
+        }
+
+        function simular(pct) {
+            document.getElementById('simOut').textContent = pct + '%';
+            const pot = PAISES.reduce((a, p) => a + (p.techo_precio_p75 != null ? p.litros_totales * (p.techo_precio_p75 - p.precio_mediano) : 0), 0);
+            const base = TOT_FOB;
+            const gain = pot * pct / 100, rel = base ? gain / base * 100 : 0;
+            document.getElementById('simBig').textContent = '+USD ' + f0(gain);
+            document.getElementById('simBar').style.width = Math.min(rel, 100) + '%';
+            document.getElementById('simTxt').textContent = `Equivale a +${f2(rel)}% sobre el valor FOB exportado (USD ${f0(base)}).`;
+            // Qué mercado explica más del potencial (el P75 de algunos se apoya en lotes chicos de precio alto)
+            const aporte = PAISES.map(p => ({ p, v: p.techo_precio_p75 != null ? p.litros_totales * (p.techo_precio_p75 - p.precio_mediano) : 0 })).sort((a, b) => b.v - a.v)[0];
+            if (aporte && pot > 0) document.getElementById('simNote').textContent = `Ojo: ${nm(aporte.p.pais)} explica el ${f2(aporte.v / pot * 100)}% del potencial, y su P75 puede apoyarse en lotes chicos de precio muy alto. Leelo como un techo optimista.`;
+        }
+    </script>
+
+</body>
+
+
