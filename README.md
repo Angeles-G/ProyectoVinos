@@ -45,7 +45,7 @@ El foco principal está en demostrar que la oportunidad estratégica reside en e
 * Chart.js (v4): Visualización de datos interactivos (gráficos de barras, burbujas dinámicas, doughnut y rangos).
   
 ## 📊 Dataset y Origen de Datos
-Los datos provienen de los registros oficiales analizados para la competencia Contar con Datos 2026 (Universidad de San Andrés), procesados previamente en Python (Pandas / NumPy) para estructurar métricas agregadas por mercado (mediana, percentiles, volúmenes, embarques) y generar el archivo estático datos_completos.json.
+Los datos provienen de datos abiertos del gobierno, mas precisamente de " Datos de agricultura, ganadería y pesca - Padrón de Operadores Orgánicos", analizados para la competencia Contar con Datos 2026 (Universidad de San Andrés), procesados previamente en Python (Pandas / NumPy) para estructurar métricas agregadas por mercado (mediana, percentiles, volúmenes, embarques) y generar el archivo estático datos_completos.json.
 
 ## 👩‍💻 Autora
 Lupe Malbec/ Angeles Belén García — Desarrollo, Análisis de Datos y Diseño UI/UX
